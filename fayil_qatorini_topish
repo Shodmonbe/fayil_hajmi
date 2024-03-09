@@ -1,0 +1,39 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+
+def hisoblash(fayl_nomi):
+    try:
+        # Fayl nomini fayl nomi va .py papkasi ichida bo'lishini tekshirish
+        if not fayl_nomi.endswith('.py'):
+            fayl_nomi = os.path.join(os.path.dirname(__file__), fayl_nomi)
+        # Faylni ochish
+        with open(fayl_nomi, 'r') as fayl:
+            # Fayldagi qatorlarni sonini hisoblaydi
+            qatorlar_soni = sum(1 for qator in fayl)
+        # Natijani o'yna oynasiga chiqarish
+        oyna.insert(tk.END, f"Faylda {qatorlar_soni} qator mavjud.\n")
+    except FileNotFoundError:
+        oyna.insert(tk.END, "Xatolik: Fayl topilmadi!\n")
+    except Exception as e:
+        oyna.insert(tk.END, f"Xatolik: {e}\n")
+
+def fayl_tanlash():
+    fayl_nomi = filedialog.askopenfilename(title="Fayl tanlash", filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
+    if fayl_nomi:
+        hisoblash(fayl_nomi)
+
+# O'yin oynachlarini yaratish
+root = tk.Tk()
+root.title("Fayl Qatorlar Sonini Hisoblash")
+
+# Oyna yaratish
+oyna = tk.Text(root)
+oyna.pack(fill=tk.BOTH, expand=True)
+
+# Fayl tanlash tugmasi
+tanlash_btn = tk.Button(root, text="Fayl tanlash", command=fayl_tanlash)
+tanlash_btn.pack(pady=20)
+
+# O'yin oynachini chiqarish
+root.mainloop()
