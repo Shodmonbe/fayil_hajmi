@@ -1,0 +1,90 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+
+def topish_bat_fayllari(directory):
+    bat_fayllari = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".bat"):
+                bat_fayllari.append(os.path.join(root, file))
+    return bat_fayllari
+
+def hajm_va_qator_soni_chiqarish(fayl_nomi):
+    jami_hajm = os.path.getsize(fayl_nomi)
+    with open(fayl_nomi, 'r', encoding='utf-8') as f:
+        jami_qator_soni = len(f.readlines())
+    return jami_hajm, jami_qator_soni
+
+def qidirish():
+    papka_nomi = filedialog.askdirectory()
+    if papka_nomi:
+        oyna.delete('1.0', tk.END)  # Eski ma'lumotlarni o'chiramiz
+        fayl_turlari = {}  # Fayl turlari ro'yxati
+        for root, dirs, files in os.walk(papka_nomi):
+            for file in files:
+                fayl_tur = "Fayl"
+                if os.path.splitext(file)[1] == '':
+                    fayl_tur = "Papka"
+                else:
+                    if file.endswith(".bat"):
+                        fayl_tur = "Bat Fayl"  # .bat fayllarini tanlaymiz
+                        hajm, qator_soni = hajm_va_qator_soni_chiqarish(os.path.join(root, file))
+                        oyna.insert(tk.END, f"{os.path.join(root, file)} - Hajmi: {hajm} bayt, Qator soni: {qator_soni}\n", "Bat")
+                        oyna.insert(tk.END, f"    [Uchirish]\n", "Uchirish", os.path.join(root, file))
+                fayl_turlari.setdefault(fayl_tur, []).append(os.path.join(root, file))
+        # Fayl turlarini chiqaramiz
+        for fayl_tur, fayllar in fayl_turlari.items():
+            oyna.insert(tk.END, f"{fayl_tur}lar:\n", fayl_tur)
+            for fayl in fayllar:
+                if fayl_tur != "Bat Fayl":
+                    hajm, qator_soni = hajm_va_qator_soni_chiqarish(fayl)
+                    oyna.insert(tk.END, f"{fayl} - Hajmi: {hajm} bayt, Qator soni: {qator_soni}\n")
+                    oyna.insert(tk.END, f"    [Uchirish]\n", "Uchirish", fayl)
+
+def uchirish():
+    selected_text = oyna.tag_ranges(tk.SEL)
+    if selected_text:
+        start = selected_text[0]
+        end = selected_text[1]
+        selected_file = oyna.get(start, end)
+        if selected_file.endswith('.bat'):
+            os.remove(selected_file.strip())
+            oyna.delete(start, end)
+            oyna.insert(tk.END, f"{selected_file} o'chirildi\n")
+        else:
+            oyna.insert(tk.END, f"Faqat .bat fayllarini o'chirishingiz mumkin\n", "Error")
+    else:
+        oyna.insert(tk.END, "Fayl tanlanmagan\n", "Error")
+
+# O'yin oynachlarini yaratish
+root = tk.Tk()
+root.title("Fayl Qidirish va Tanlash")
+
+# Oyna yaratish
+oyna = tk.Text(root)
+oyna.pack(fill=tk.BOTH, expand=True)
+
+# Qidirish tugmasi
+qidirish_btn = tk.Button(root, text="Qidirish", command=qidirish)
+qidirish_btn.pack(pady=10)
+
+# Yulni tanlash tugmasi
+yul_tanlash_btn = tk.Button(root, text="Yulni tanlash", command=lambda: filedialog.askdirectory())
+yul_tanlash_btn.pack(pady=10)
+
+# Uchirish tugmasini qo'shish
+uchirish_btn = tk.Button(root, text="Uchirish", command=uchirish)
+uchirish_btn.pack(pady=10)
+
+# Uchirish tugmasi uchun tag berish
+oyna.tag_bind("Uchirish", "<Button-1>", lambda event: uchirish())
+
+# Ranglarni sozlash
+oyna.tag_config("Papka", foreground="blue")
+oyna.tag_config("Bat", foreground="red")
+oyna.tag_config("Uchirish", foreground="green")
+oyna.tag_config("Error", foreground="red")
+
+# O'yin oynachini chiqarish
+root.mainloop()
