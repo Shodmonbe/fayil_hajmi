@@ -1,0 +1,38 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+
+def hajm_hisoblash(fayl_nomi):
+    try:
+        # Fayl nomini fayl nomi va .py papkasi ichida bo'lishini tekshirish
+        if not fayl_nomi.endswith('.py'):
+            fayl_nomi = os.path.join(os.path.dirname(__file__), fayl_nomi)
+        # Faylni ochish
+        hajm = os.path.getsize(fayl_nomi)
+        # Natijani o'yna oynasiga chiqarish
+        oyna.insert(tk.END, f"Faylda {hajm} bayt hajm mavjud.\n")
+    except FileNotFoundError:
+        oyna.insert(tk.END, "Xatolik: Fayl topilmadi!\n")
+    except Exception as e:
+        oyna.insert(tk.END, f"Xatolik: {e}\n")
+
+def fayl_tanlash():
+    fayl_nomi = filedialog.askopenfilename(title="Fayl tanlash", filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
+    if fayl_nomi:
+        hajm_hisoblash(fayl_nomi)
+
+# O'yin oynachlarini yaratish
+root = tk.Tk()
+root.title("Fayl Hajmini Hisoblash")
+
+# Oyna yaratish
+oyna = tk.Text(root)
+oyna.pack(fill=tk.BOTH, expand=True)
+
+# Fayl tanlash tugmasi
+tanlash_btn = tk.Button(root, text="Fayl tanlash", command=fayl_tanlash)
+tanlash_btn.pack(pady=20)
+
+# O'yin oynachini chiqarish
+root.mainloop()
+
